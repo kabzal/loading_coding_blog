@@ -24,6 +24,7 @@ urlpatterns = [
 
     # Далее - ссылки для API
     path('api/v1/', include(router.urls), name='api_posts'),
+    # Авторизация:
     path('api/v1/auth/', include('djoser.urls'), name='auth'),
     re_path(r'^auth/', include('djoser.urls.authtoken')),
     path('api/v1/token/', TokenObtainPairView.as_view(), name='token_obtaion_pair'),

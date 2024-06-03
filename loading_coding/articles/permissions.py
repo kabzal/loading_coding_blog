@@ -1,5 +1,7 @@
 from rest_framework import permissions
 
+
+# Разрешение: доступ только для администратора сайта и/или автора статьи
 class IsOwnerOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:

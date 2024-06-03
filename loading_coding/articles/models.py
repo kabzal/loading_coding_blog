@@ -4,12 +4,13 @@ from django.db import models
 from django.urls import reverse
 
 
+# Менеджер для запросов только по опубликованным статьям
 class PublishedManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(is_published=Posts.Status.PUBLISHED)
 
 
-# модель с основной информацией
+# Модель с основной информацией о статьях
 class Posts(models.Model):
     class Status(models.IntegerChoices):
         DRAFT = 0, 'Черновик'
@@ -79,6 +80,7 @@ class Posts(models.Model):
         return reverse('post', kwargs={'post_slug': self.slug})
 
 
+# Модель с категориями
 class Category(models.Model):
     name = models.CharField(max_length=150,
                             db_index=True,
@@ -98,6 +100,7 @@ class Category(models.Model):
         return reverse('category', kwargs={'cat_slug': self.slug})
 
 
+# Модель с тегами
 class Tag(models.Model):
     tag = models.CharField(max_length=100,
                            db_index=True)
@@ -111,10 +114,12 @@ class Tag(models.Model):
         return reverse('tag', kwargs={'tag_slug': self.slug})
 
 
+# Модель загруженных файлов
 class UploadFiles(models.Model):
     file = models.FileField(upload_to='uploads_model')
 
 
+# Модель для комментариев к статьям
 class Comment(models.Model):
     post = models.ForeignKey(Posts,
                              on_delete=models.CASCADE,
@@ -139,6 +144,7 @@ class Comment(models.Model):
         return f'Комментарий пользователя {self.commenter.username} к посту {self.post.title}'
 
 
+# Модель для хранения данных об обращениях, отправленных через форму обратной связи
 class Contact(models.Model):
     name = models.CharField(max_length=255,
                             verbose_name="Имя обратившегося")

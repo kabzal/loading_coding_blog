@@ -16,6 +16,7 @@ from articles.serializers import PostsSerializer
 from articles.utils import DataMixin
 
 
+# Главная страница (статьи)
 class HomePage(DataMixin, ListView):
     template_name = 'articles/index.html'
     context_object_name = 'posts'
@@ -36,6 +37,7 @@ class HomePage(DataMixin, ListView):
         return posts_lst
 
 
+# Страница с текстом выбранной статьи и комментариями к ней
 class ShowPost(LoginRequiredMixin, DataMixin, DetailView):
     template_name = 'articles/post.html'
     slug_url_kwarg = 'post_slug'
@@ -43,16 +45,19 @@ class ShowPost(LoginRequiredMixin, DataMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['comment_form'] = CommentAddForm()
+        context['comment_form'] = CommentAddForm() # Форма добавления нового комментария
         return self.get_mixin_context(context, title=context['post'].title)
 
     def get_object(self, queryset=None):
         post = get_object_or_404(Posts.published, slug=self.kwargs[self.slug_url_kwarg])
+        # При открытии статьи счетчик просмотров увеличивается на 1
         post.read_num += 1
         post.save()
         return post
 
     def post(self, request, *args, **kwargs):
+        # Срабатывает POST-запрос в случае, если была заполнена и отправлена
+        # форма создания нового комментария
         post = self.get_object()
         self.object = post
         form = CommentAddForm(request.POST)
@@ -66,7 +71,7 @@ class ShowPost(LoginRequiredMixin, DataMixin, DetailView):
             return self.render_to_response(self.get_context_data())
 
 
-# класс представления для добавления новой статьи
+# Класс представления для добавления новой статьи
 class AddPost(PermissionRequiredMixin, LoginRequiredMixin, DataMixin, CreateView):
     form_class = AddPostForm
     template_name = 'articles/addpost.html'
@@ -79,6 +84,7 @@ class AddPost(PermissionRequiredMixin, LoginRequiredMixin, DataMixin, CreateView
         return super().form_valid(form)
 
 
+# Класс представления для редактирования статьи
 class UpdatePost(PermissionRequiredMixin, DataMixin, UpdateView):
     model = Posts
     fields = ('title', 'content', 'photo', 'is_published', 'cat')
@@ -88,6 +94,7 @@ class UpdatePost(PermissionRequiredMixin, DataMixin, UpdateView):
     permission_required = 'articles.change_posts'
 
 
+# Страница с формой обратной связи, сохраняющая обращение пользователя в БД
 class ContactFormView(DataMixin, FormView):
     form_class = ContactForm
     template_name = 'articles/contact.html'
@@ -104,6 +111,7 @@ class ContactFormView(DataMixin, FormView):
         return super().form_valid(form)
 
 
+# Отображение статей по выбранной категории
 class PostsCategory(DataMixin, ListView):
     template_name = 'articles/index.html'
     context_object_name = 'posts'
@@ -120,6 +128,7 @@ class PostsCategory(DataMixin, ListView):
         return self.get_mixin_context(context, title='Категория: ' + cat.name, cat_selected=cat.pk)
 
 
+# Отображение статей по выбранному тегу
 class TagPostList(DataMixin, ListView):
     template_name = 'articles/index.html'
     context_object_name = 'posts'
@@ -136,6 +145,7 @@ class TagPostList(DataMixin, ListView):
         return Posts.published.filter(tags__slug=self.kwargs['tag_slug']).select_related('cat')
 
 
+# Отображение избранных статей
 class FavoritePostList(LoginRequiredMixin, DataMixin, ListView):
     template_name = 'articles/index.html'
     context_object_name = 'posts'
@@ -180,16 +190,18 @@ def remove_comment(request, comment_id):
         redirect(reverse('post', kwargs={'post_slug': post_slug}))
 
 
-# обработка ненайденной страницы (ошибка 404)
+# Обработка ненайденной страницы (ошибка 404)
 def page_not_found(request, exception):
     return HttpResponseNotFound('<h1>Ошибка 404: Страница не найдена.<br>Попробуйте проверить ссылку</h1>')
 
 
 # <----------! Представления для API !---------->
 
+
+# Доступ к опубликованным статьям с помощью API
 class ArticlesViewSet(viewsets.ModelViewSet):
     serializer_class = PostsSerializer
-    permission_classes = (IsOwnerOrReadOnly, )
+    permission_classes = (IsOwnerOrReadOnly, ) # Разрешение только для админа и автора статьи
 
     def get_queryset(self):
         pk = self.kwargs.get("pk")

@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 from articles.models import Category, Posts, Comment
 
 
+# Форма добавления новой статьи
 class AddPostForm(forms.ModelForm):
     cat = forms.ModelChoiceField(queryset=Category.objects.all(),
                                  empty_label="Категория не выбрана",
@@ -26,10 +27,12 @@ class AddPostForm(forms.ModelForm):
         return title
 
 
+# Загрузка изображений
 class UploadFileForm(forms.Form):
     file = forms.ImageField(label="Файл")
 
 
+# Форма обратной связи с CAPTCHA
 class ContactForm(forms.Form):
     name = forms.CharField(label="Имя", max_length=255)
     email = forms.EmailField(label="Email")
@@ -37,6 +40,7 @@ class ContactForm(forms.Form):
     captcha = CaptchaField()
 
 
+# Форма добавления нового комментария к статье
 class CommentAddForm(forms.ModelForm):
     class Meta:
         model = Comment
