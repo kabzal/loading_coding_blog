@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block breadcrumbs %}
+{% if perms.articles.change_post %}
+<p><a href="{% url 'edit_page' post.slug %}">🖊️ Редактировать</a></p>
+{% endif %}
+
+{% if user.is_authenticated %}
+    {% if post in user.favorite_posts.all %}
+        <a href="{% url 'remove_favorite' post.id %}">- Убрать из избранного</a>
+    {% else %}
+        <a href="{% url 'add_favorite' post.id %}">+ Добавить в избранное</a>
+    {% endif %}
+{% endif %}
+
+<!-- Теги -->
+{% with post.tags.all as tags %}
+{% if tags %}
+<p>
+    <ul class="post-tags-list">
+        <li>Теги:</li>
+        {% for t in tags %}
+        <li><a href="{{t.get_absolute_url}}">{{t.tag}}</a></li>
+        {% endfor %}
+    </ul>
+</p>
+{% endif %}
+{% endwith %}
+{% endblock %}
+
+{% block content %}
+<div class="post-and-comments">
+    <div class="post-section">
+        <h1>{{post.title}}</h1>
+
+        {% if post.photo %}
+            <p><img class="img-article-left" src="{{post.photo.url}}"></p>
+        {% endif %}
+        <p style="color: #FED305; font-family: 'RobotoMono-Light'; font-size: 14px;">Просмотров: {{ post.read_num }}</p>
+        <div class="post-content">{{post.content|linebreaks}}</div>
+    </div>
+
+    <div class="comment-section">
+        <h3>Комментарии:</h3>
+        <!-- Форма для добавления комментариев -->
+
+        <form method="post" action="">
+            {% csrf_token %}
+            <table class="new-comment">
+                {% for f in comment_form %}
+                    <tr>
+                        <td>{{ f.label }}</td>
+                        <td>{{ f }}</td>
+                        <td><button type="submit">-></button></td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </form>
+
+        <!-- Вывод существующих комментариев -->
+        {% if post.comments.all %}
+          <table>
+            {% for comment in post.comments.all %}
+              <tr>
+                  <td class="comment-date">{{comment.created|date:"d.m.Y H:i"}}</td>
+                  <td class="commenter-name">{{ comment.commenter.username }}:</td>
+                  <td class="comment-body">{{ comment.body }}</td>
+                  <td class="comment-rm">
+                      {% if user.is_authenticated %}
+                        {% if comment.commenter.id == user.id or user.is_staff %}
+                            <a href="{% url 'remove_comment' comment.id %}">🗑️</a>
+                        {% endif %}
+                      {% endif %}
+                  </td>
+              </tr>
+            {% endfor %}
+          </table>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

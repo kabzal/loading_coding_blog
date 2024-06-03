@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1>{{ title }}</h1>
+
+<div class="container">
+	<div class="list_of_articles">
+		<ul class="list-articles">
+			{% for p in posts %}
+			<li>
+				<div class="article-panel">
+					<p class="first">
+						<a href="{% url 'category' p.cat.slug %}">{{p.cat.name}}</a>
+						| автор: {{ p.author.username|default:"неизвестен" }} |
+						Просмотров: <span class="view-count">{{ p.read_num }}</span>
+					</p>
+					<p class="last">{{p.time_update|date:"d.m.Y H:i"}}</p>
+				</div>
+
+				{% if p.photo %}
+					<p><img class="img-article-left thumb" src="{{p.photo.url}}"></p>
+				{% endif %}
+
+				<h2>{{p.title}}</h2>
+				<div class="short-text">
+				{% autoescape off %}
+					{{p.content|linebreaks|truncatewords:40}}
+				{% endautoescape %}
+				</div>
+
+				<div class="clear"></div>
+
+				<div class="link-read-post">
+					<a href="{{ p.get_absolute_url }}">Читать полностью</a>
+				</div>
+			</li>
+			{% endfor %}
+		</ul>
+	</div>
+
+	<div class="most_popular">
+		<h2>Популярные статьи</h2>
+		<ul class="most_popular">
+			{% for pop_post in popular_posts %}
+				<li><a href="{{ pop_post.get_absolute_url }}">{{ pop_post.title }}</a></li>
+			{% endfor %}
+		</ul>
+	</div>
+</div>
+{% endblock %}
+
+
+{% block navigation %}
+{% if page_obj.has_other_pages %}
+<p></p>
+<nav class="list-pages">
+    <ul>
+		{% if page_obj.has_previous %}
+		<li class="page-num">
+			<a href="?page={{ page_obj.previous_page_number }}">&lt;</a>
+		</li>
+		{% endif %}
+
+        {% for p in paginator.page_range %}
+		{% if page_obj.number == p %}
+		<li class="page-num page-num-selected">{{ p }}</li>
+		{% elif p >= page_obj.number|add:-2 and p <= page_obj.number|add:2 %}
+        <li class="page-num">
+            <a href="?page={{ p }}">{{ p }}</a>
+        </li>
+		{% endif %}
+        {% endfor %}
+
+		{% if page_obj.has_next %}
+		<li class="page-num">
+			<a href="?page={{ page_obj.next_page_number }}">&gt;</a>
+		</li>
+		{% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}
