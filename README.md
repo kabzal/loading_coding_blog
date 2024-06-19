@@ -4,13 +4,11 @@ Loading Coding - это блог на Django, который включает в
 
 ## Установка
 
-### Шаги установки
-
 1. Клонируйте репозиторий:
 
     ```bash
-    git clone https://github.com/username/loading-coding-blog.git
-    cd loading-coding-blog
+    git clone https://github.com/kabzal/loading_coding_blog.git
+    cd loading_coding
     ```
 
 2. Создайте и активируйте виртуальное окружение:
@@ -27,7 +25,7 @@ Loading Coding - это блог на Django, который включает в
     pip install -r requirements.txt
     ```
 
-4. Создайте файл `.env` в корневой папке проекта и добавьте необходимые переменные окружения:
+4. Создайте файл `.env` в папке конфигурации loading_coding/loading_coding и добавьте необходимые переменные окружения:
 
     ```plaintext
     SECRET_KEY = 'your_secret_key'
